@@ -3,144 +3,318 @@
 ## Healthcare Interoperability Series — Projet #1
 ### Legacy-to-FHIR Foundation Pipeline
  
+# Healthcare Interoperability Series #1
+
+# Legacy-to-FHIR Foundation Pipeline
+
+## Problem Statement
+
+Les systèmes de santé génèrent une quantité importante de données cliniques.
+
+Cependant, ces données sont souvent :
+
+- dispersées dans plusieurs systèmes
+- difficiles à exploiter
+- peu adaptées à l'analyse
+
+Avant de pouvoir connecter des hôpitaux, construire des plateformes cloud ou utiliser l'IA, il faut comprendre comment les données médicales sont structurées.
+
+Ce projet répond à une question fondamentale :
+
+> Comment une donnée clinique devient-elle une information exploitable ?
+
 ---
- 
-## Pourquoi ce projet existe
- 
-Tu construis une série de 3 projets qui racontent une progression :
-comprendre la donnée de santé → connecter des systèmes → concevoir des plateformes.
- 
-Ce premier projet répond à une question simple :
- 
-> **Comment une donnée clinique brute devient une information exploitable ?**
- 
-C'est la fondation. Sans elle, les projets suivants n'ont pas de sens.
- 
+
+# Business Problem
+
+Imaginons une plateforme de suivi de patients diabétiques.
+
+Les professionnels de santé souhaitent :
+
+- suivre l'évolution de la glycémie des patients
+- identifier les patients à risque
+- visualiser rapidement les indicateurs importants
+- préparer les consultations grâce à des données fiables
+
+Avant toute analyse avancée, les données doivent être :
+
+1. structurées
+2. stockées
+3. accessibles
+
 ---
- 
-## Ce que tu vas construire
- 
-Un pipeline de bout en bout qui :
- 
-1. **Génère** des patients fictifs avec leurs données médicales (diagnostics, prescriptions, mesures)
-2. **Stocke** ces données dans un serveur FHIR — le standard moderne de l'interopérabilité en santé
-3. **Extrait** ces données vers une base relationnelle classique pour l'analyse
-4. **Visualise** les données dans un dashboard clinique
-À la fin, tu as un environnement qui tourne en une commande, des données cliniques qui circulent d'un bout à l'autre, et un dashboard qu'on peut montrer.
- 
+
+# Project Goal
+
+Construire un pipeline de données de santé de bout en bout permettant de :
+
+- générer des patients fictifs
+- stocker leurs données au format FHIR
+- extraire les données vers une base analytique
+- visualiser des indicateurs cliniques
+
 ---
- 
-## Ce que ce projet te rapporte
- 
-Après ce projet, tu seras capable de :
- 
-- Lire et comprendre un bundle FHIR R4 sans aide
-- Interagir avec une API FHIR (envoyer, récupérer, rechercher des ressources)
-- Expliquer comment une donnée médicale est structurée selon le standard FHIR
-- Construire un pipeline données de santé de zéro
-- Parler de tout ça en entretien avec des exemples concrets
+
+# Architecture Overview
+
+```text
+                    ┌──────────────┐
+                    │   Synthea    │
+                    │ Patient Data │
+                    └──────┬───────┘
+                           │
+                           ▼
+                    ┌──────────────┐
+                    │ HAPI FHIR    │
+                    │ Server       │
+                    └──────┬───────┘
+                           │
+                           ▼
+                    ┌──────────────┐
+                    │ PostgreSQL   │
+                    │ Analytics DB │
+                    └──────┬───────┘
+                           │
+                           ▼
+                    ┌──────────────┐
+                    │ Dashboard    │
+                    │ Metabase     │
+                    └──────────────┘
+```
+
 ---
- 
-## Les outils — ce qu'ils font en une phrase
- 
-| Outil | Ce qu'il fait dans ce projet |
-|---|---|
-| **Synthea** | Génère des patients fictifs réalistes au format FHIR |
-| **HAPI FHIR Server** | Serveur qui stocke les ressources FHIR et expose une API REST |
-| **PostgreSQL** | Base de données classique pour l'analyse |
-| **Metabase ou Grafana** | Dashboard connecté à PostgreSQL |
-| **Docker Compose** | Lance tout l'environnement en une seule commande |
-| **Python** | Scripts de connexion entre les blocs |
- 
-Tu n'as pas besoin de tout maîtriser avant de commencer. Tu apprendras en faisant.
- 
+
+# Technologies Used
+
+| Tool | Purpose |
+|--------|----------|
+| Synthea | Generate realistic synthetic patients |
+| HAPI FHIR Server | Store FHIR resources |
+| PostgreSQL | Analytics database |
+| Metabase | Clinical dashboard |
+| Docker Compose | Local environment |
+| Python | Data ingestion and extraction |
+
 ---
- 
-## Compétences à avoir / acquérir
- 
-### Avant de commencer — lire seulement
-- Comprendre ce qu'est un Bundle FHIR : un conteneur qui regroupe plusieurs ressources médicales (patient + diagnostics + mesures) dans un seul fichier JSON
-- Savoir faire une requête HTTP POST en Python avec la librairie `requests`
-- Savoir lancer un `docker-compose up`
-### Pendant le projet — tu apprendras en faisant
-- La syntaxe des requêtes de recherche FHIR (différente d'une API classique)
-- Comment aplatir un JSON imbriqué en table SQL
-- Comment les ressources FHIR se référencent entre elles
-### Indicateur que tu as réussi
-> Tu peux expliquer à voix haute, sans regarder le code, comment une donnée part de Synthea et arrive dans le dashboard.
- 
+
+# Healthcare Standards Used
+
+- FHIR R4
+- REST API
+- JSON
+
+FHIR resources used:
+
+- Patient
+- Observation
+- Condition
+- Encounter
+
 ---
- 
-## Feuille de Route
- 
-### 🟦 Étape 1 — Poser l'environnement
-**Ce qu'il faut faire :** Lancer tous les outils ensemble via Docker Compose et vérifier que chacun répond.
- 
-**Résultat attendu :** HAPI FHIR Server accessible dans le navigateur, PostgreSQL connecté, Metabase/Grafana qui démarre.
- 
+
+# Clinical Use Case
+
+This project simulates a diabetes monitoring platform.
+
+Example indicators:
+
+- Average blood glucose levels
+- Number of observations per patient
+- Most common diagnoses
+- Patients requiring attention
+
 ---
- 
-### 🟦 Étape 2 — Générer et observer des données
-**Ce qu'il faut faire :** Utiliser Synthea pour créer une dizaine de patients fictifs. Ouvrir les fichiers générés et les lire.
- 
-**Résultat attendu :** Tu comprends la structure d'un fichier Bundle. Tu sais identifier les ressources `Patient`, `Observation`, `Condition` à l'intérieur.
- 
-> 💡 Prends le temps ici. Comprendre le Bundle avant de coder te fera gagner beaucoup de temps ensuite.
- 
+
+# Learning Objectives
+
+After completing this project, I should be able to:
+
+## FHIR
+
+- Read and understand a Bundle
+- Navigate between resources
+- Query a FHIR API
+- Explain the role of Patient, Observation and Condition resources
+
+## Data Engineering
+
+- Extract data from an API
+- Transform nested JSON structures
+- Load data into PostgreSQL
+- Build analytical views
+
+## Healthcare Interoperability
+
+- Understand how clinical data is structured
+- Explain why FHIR exists
+- Understand the difference between operational and analytical systems
+
 ---
- 
-### 🟦 Étape 3 — Envoyer les données dans le serveur FHIR
-**Ce qu'il faut faire :** Écrire un script Python qui lit les fichiers Synthea et les poste sur HAPI FHIR Server via l'API REST.
- 
-**Résultat attendu :** Les patients sont visibles dans le serveur FHIR. Tu peux les retrouver via une requête GET dans le navigateur ou Postman.
- 
+
+# Success Criteria
+
+The project is successful if I can explain without looking at the code:
+
+1. How Synthea generates patients
+2. How resources are stored in HAPI FHIR
+3. How data is extracted into PostgreSQL
+4. How clinical indicators are displayed in the dashboard
+
 ---
- 
-### 🟦 Étape 4 — Extraire les données vers PostgreSQL
-**Ce qu'il faut faire :** Écrire un script Python qui appelle l'API FHIR, récupère les ressources, et les insère dans des tables PostgreSQL.
- 
-**Résultat attendu :** Tu as des tables `patients`, `observations`, `conditions` remplies. Une requête SQL simple te retourne des résultats.
- 
+
+# Roadmap
+
+## Phase 1 — Environment Setup
+
+### Goal
+
+Launch the complete environment.
+
+### Tasks
+
+- Create Docker Compose stack
+- Start PostgreSQL
+- Start HAPI FHIR Server
+- Start Metabase
+
+### Expected Outcome
+
+All services are accessible locally.
+
 ---
- 
-### 🟦 Étape 5 — Construire le dashboard
-**Ce qu'il faut faire :** Connecter Metabase ou Grafana à PostgreSQL et créer quelques visualisations cliniques.
- 
-**Résultat attendu :** Un dashboard avec au minimum 3 graphiques — par exemple la répartition par âge, les diagnostics les plus fréquents, les types de mesures enregistrées.
- 
+
+## Phase 2 — Understanding FHIR Data
+
+### Goal
+
+Explore generated clinical data.
+
+### Tasks
+
+- Generate synthetic patients using Synthea
+- Open Bundle files
+- Identify Patient resources
+- Identify Observation resources
+- Identify Condition resources
+
+### Expected Outcome
+
+Understand the structure of a FHIR Bundle.
+
 ---
- 
-### 🟦 Étape 6 — Documenter et publier
-**Ce qu'il faut faire :** Compléter le README public du repo, noter ce que tu as appris, pousser sur GitHub.
- 
-**Résultat attendu :** Un repo propre, un README qui explique le projet clairement, un historique de commits lisible.
- 
+
+## Phase 3 — FHIR Data Ingestion
+
+### Goal
+
+Load FHIR resources into HAPI.
+
+### Tasks
+
+- Build Python ingestion script
+- POST resources through REST API
+- Validate imported resources
+
+### Expected Outcome
+
+Patients are visible in the FHIR server.
+
 ---
- 
-## Ce que ce projet ne fait pas — et c'est volontaire
- 
-Ce projet utilise des données déjà en format FHIR (générées par Synthea).
- 
-Il ne traite pas de données legacy HL7 v2. Il ne gère pas la transformation entre formats.
- 
-C'est exactement ce que le **Projet #2** va introduire.
- 
+
+## Phase 4 — Analytics Extraction
+
+### Goal
+
+Move healthcare data into PostgreSQL.
+
+### Tasks
+
+- Query FHIR API
+- Extract Patient data
+- Extract Observation data
+- Load PostgreSQL tables
+
+### Expected Outcome
+
+Analytics-ready database.
+
 ---
- 
-## Lien avec le Projet #2
- 
-Le Projet #1 répond à la question : *"Je comprends comment fonctionne FHIR."*
- 
-Le Projet #2 va poser la vraie question du terrain hospitalier :
- 
-> **Comment intégrer un système legacy qui ne parle pas FHIR ?**
- 
-Dans le Projet #2, tu vas :
-- Recevoir des messages au format **HL7 v2** — le format encore dominant dans 80% des hôpitaux français
-- Utiliser **Mirth Connect** pour les transformer en ressources FHIR
-- Envoyer le résultat vers le même serveur HAPI FHIR que tu auras construit ici
-C'est pour ça que ce premier projet est indispensable : il construit le socle sur lequel tout le reste s'appuie.
- 
+
+## Phase 5 — Clinical Dashboard
+
+### Goal
+
+Visualize healthcare insights.
+
+### Tasks
+
+Create dashboards displaying:
+
+- Average blood glucose values
+- Observation counts
+- Diagnosis distribution
+- Patient population overview
+
+### Expected Outcome
+
+Operational healthcare dashboard.
+
+---
+
+## Phase 6 — Documentation & Publishing
+
+### Goal
+
+Publish a professional GitHub repository.
+
+### Tasks
+
+- Complete README
+- Add architecture diagrams
+- Add lessons learned
+- Publish source code
+
+### Expected Outcome
+
+Portfolio-ready project.
+
+---
+
+# Tradeoffs
+
+| Decision | Choice | Tradeoff |
+|-----------|---------|-----------|
+| Data Source | Synthea | Safe but simplified |
+| FHIR Server | HAPI | Lightweight vs enterprise solution |
+| Database | PostgreSQL | Simpler than a data lake |
+
+---
+
+# Future Improvements
+
+Implemented in Project #2:
+
+- HL7 v2 messages
+- Mirth Connect
+- HL7 → FHIR transformation
+- Integration Engine concepts
+
+Implemented in Project #3:
+
+- Event-driven architecture
+- Cloud deployment
+- AI-assisted workflows
+- Observability platform
+
+---
+
+# Series Progression
+
+Healthcare Interoperability Series
+
+- Project #1 → Understanding Healthcare Data ← Current Project
+- Project #2 → Connecting Healthcare Systems
+- Project #3 → Designing Healthcare Platforms
 ---
  
 *Série Healthcare Interoperability — Projet 1 sur 3*
