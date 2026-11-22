@@ -31,12 +31,14 @@ DB_PARAMS = {
     "dbname": os.getenv("POSTGRES_DB"),
 }
 
-# Type de ressource FHIR -> table PostgreSQL
+# Type de ressource FHIR -> requête qui compte ces ressources dans PostgreSQL.
+# Pour les Observations, on compte les id FHIR distincts : une Observation
+# avec des components (ex. tension artérielle) occupe plusieurs lignes.
 RESOURCES = {
-    "Patient": "patients",
-    "Encounter": "encounters",
-    "Observation": "observations",
-    "Condition": "conditions",
+    "Patient": "SELECT COUNT(*) FROM patients",
+    "Encounter": "SELECT COUNT(*) FROM encounters",
+    "Observation": "SELECT COUNT(DISTINCT fhir_id) FROM observations",
+    "Condition": "SELECT COUNT(*) FROM conditions",
 }
 
 
@@ -61,9 +63,9 @@ def check_completeness(cur):
     """Compare HAPI et PostgreSQL. Renvoie le nombre d'écarts."""
     print("Complétude (HAPI -> PostgreSQL)")
     errors = 0
-    for resource_type, table in RESOURCES.items():
+    for resource_type, count_query in RESOURCES.items():
         in_hapi = hapi_count(resource_type)
-        in_pg = sql_value(cur, f"SELECT COUNT(*) FROM {table}")
+        in_pg = sql_value(cur, count_query)
         status = "OK" if in_hapi == in_pg else "ÉCART"
         if status != "OK":
             errors += 1
@@ -95,15 +97,17 @@ def check_quality(cur):
             warnings += 1
         print(f"  {label:<48} {count:>6}")
 
-    # Observations sans valeur numérique : on affiche les codes les plus touchés
-    missing = sql_value(cur, "SELECT COUNT(*) FROM observations WHERE value IS NULL")
-    print(f"  {'Observations sans valeur numérique':<48} {missing:>6}")
+    # Observations sans aucune valeur (ni numérique, ni codée/texte)
+    missing = sql_value(
+        cur, "SELECT COUNT(*) FROM observations WHERE value IS NULL AND value_text IS NULL"
+    )
+    print(f"  {'Observations sans valeur':<48} {missing:>6}")
     if missing > 0:
         warnings += 1
         cur.execute("""
             SELECT code, display, COUNT(*) AS nb
             FROM observations
-            WHERE value IS NULL
+            WHERE value IS NULL AND value_text IS NULL
             GROUP BY code, display
             ORDER BY nb DESC
             LIMIT 3
