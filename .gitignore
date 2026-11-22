@@ -2,3 +2,4 @@
 .DS_Store
 synthea/output/
 synthea/*.jar
+.venv/
