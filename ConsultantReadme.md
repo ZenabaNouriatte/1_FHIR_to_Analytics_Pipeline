@@ -102,11 +102,6 @@ This project demonstrates:
 - ✔ Docker Compose orchestration
 - ✔ SQL analytics on healthcare data
 - ✔ Healthcare interoperability foundations
-**Target role alignment:**
- 
-- FHIR Engineer (foundations)
-- Integration Engineer (junior)
-- Technical Deployment Consultant
 ---
  
 ## Future Improvements
