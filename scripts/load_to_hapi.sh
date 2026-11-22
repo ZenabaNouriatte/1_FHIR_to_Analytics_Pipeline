@@ -64,3 +64,8 @@ done
 
 echo "---"
 echo "Terminé : $ok OK, $fail en échec"
+
+# Code de sortie 1 en cas d'échec : make s'arrête au lieu de lancer l'extraction
+if [ "$fail" -gt 0 ]; then
+  exit 1
+fi

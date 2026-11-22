@@ -110,12 +110,21 @@ I updated the mapping. Result: **299 → 0** observations without a value.
 - Kidney function (eGFR, LOINC `33914-3`): `mL/min` and `mL/min/1.73m2`
 - Red blood cell width (RDW, LOINC `788-0`): `%` and `fL`
 These values can't be compared or averaged together. The check flags them, so an analyst knows to filter on one unit.
+
+## A scaling problem I debugged
+ 
+With 10 patients everything worked. With 100 patients, the load into HAPI failed after about 50 patients, then every request failed.
+ 
+1. **Symptom**: `OutOfMemoryError: Java heap space`, then `The database has been closed`.
+2. **First fix**: more memory for Java (`-Xmx3g`). Better, but it failed again after about 120 patients.
+3. **Root cause**, found in the HAPI logs just before the first error: H2 error `90108 Out of memory` while inserting into `hfj_res_link`. No database file existed in the container (`docker diff`). The HAPI Docker image runs its H2 database **in memory**, so all FHIR data is stored in the Java heap. The more patients you load, the more memory it uses, until it crashes.
+4. **Fix**: tell HAPI to write H2 to a file instead (`spring.datasource.url: jdbc:h2:file:/tmp/hapi/h2`). Memory now stays stable. 129 patients (about 96,000 measurements) load without errors.
+For real production volumes, HAPI should use an external database such as PostgreSQL.
  
 ## Dashboard
  
 ![Dashboard](docs/dashboard.png)
 
-![Dashboard](docs/dashboard_1.png)
  
 Examples of questions answered: patients by age and gender, visits per year, most common diagnoses, blood pressure over time for one patient. The SQL queries are in [`sql/queries.sql`](sql/queries.sql).
  
