@@ -65,7 +65,7 @@ SELECT effective_date,
        value AS poids_kg
 FROM observations
 WHERE code = '29463-7'
-  AND patient_id = '5621'
+  AND patient_id = {{patient_id}}
 ORDER BY effective_date;
 
 -- 10. Évolution de la tension artérielle d'un patient (ligne, 2 séries)
@@ -76,7 +76,7 @@ SELECT effective_date,
        value   AS mm_hg
 FROM observations
 WHERE code IN ('8480-6', '8462-4')
-  AND patient_id = '5621'
+  AND patient_id = {{patient_id}}
 ORDER BY effective_date;
 
 -- 11. Statut tabagique actuel des patients (valeur codée -> value_text)
